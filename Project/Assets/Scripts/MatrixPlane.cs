@@ -6,26 +6,20 @@ using UnityEngine.UI;
 
 public class MatrixPlane : MonoBehaviour
 {
-    private int _size = 5;
     Vector2[][] basePlane;
     Vector2[][] outputPlane;
     Vector2[][] targetPlane;
 
     //原点的下标
-    Vector2 originIndex;
+    Vector2Int originIndex;
     public Material lineMat;
 
-    // Start is called before the first frame update
-    void Awake()
+    public void InitPlane(int size)
     {
-        basePlane = GenerateBasePlane(_size);
-        outputPlane = GenerateBasePlane(_size);//ConvertPlane(new Matrix2x2(new Vector2(1, -2), new Vector2(3, 0)), basePlane);
-        targetPlane = GenerateBasePlane(_size);
-        originIndex = new Vector2(_size / 2, _size / 2);
-    }
-    private void Start()
-    {
-        //LerpConvert(new Matrix2x2(new Vector2(1, -2), new Vector2(3, 0)));
+        basePlane = GenerateBasePlane(size);
+        outputPlane = GenerateBasePlane(size);//ConvertPlane(new Matrix2x2(new Vector2(1, -2), new Vector2(3, 0)), basePlane);
+        targetPlane = GenerateBasePlane(size);
+        originIndex = new Vector2Int(size / 2, size / 2);
     }
 
     public void LerpConvert(Matrix2x2 matrix)
@@ -38,7 +32,6 @@ public class MatrixPlane : MonoBehaviour
             }
         }
     }
-
 
     private Vector2[][] ConvertPlane(Matrix2x2 matrix,Vector2[][] basePlane)
     {
@@ -73,30 +66,37 @@ public class MatrixPlane : MonoBehaviour
         GL.Begin(GL.LINES);
         GL.Color(color);
         lineMat.SetPass(0);
-        for (int i = 0; i < plane.Length; i++)
+        int size = plane.Length;
+        for (int i = 0; i < size; i++)
         {
             GL.Vertex(plane[i][0]);
-            GL.Vertex(plane[i][_size-1]);
+            GL.Vertex(plane[i][size - 1]);
             GL.Vertex(plane[0][i]);
-            GL.Vertex(plane[_size-1][i]);
+            GL.Vertex(plane[size - 1][i]);
         }
+        GL.Color(Color.green);
+        GL.Vertex(plane[originIndex.x][originIndex.y]);
+        GL.Vertex(plane[originIndex.x+1][originIndex.y]);
+        GL.Color(Color.red);
+        GL.Vertex(plane[originIndex.x][originIndex.y]);
+        GL.Vertex(plane[originIndex.x][originIndex.y+1]);
         GL.End();
-
     }
 
     void OnPostRender()
     {
-        DrawPlane(basePlane,Color.black);
-        DrawPlane(outputPlane, Color.green);
+        DrawPlane(basePlane,Color.white);
+        DrawPlane(outputPlane, Color.blue);
     }
 
     void Update()
     {
-        for (int i = 0; i < _size; i++)
+        int size = outputPlane.Length;
+        for (int i = 0; i < size; i++)
         {
-            for (int j = 0; j < _size; j++)
+            for (int j = 0; j < size; j++)
             {
-                outputPlane[i][j] = Vector2.Lerp(outputPlane[i][j],targetPlane[i][j],Time.deltaTime*0.5f);
+                outputPlane[i][j] = Vector2.Lerp(outputPlane[i][j],targetPlane[i][j],Time.deltaTime);
             }
         }
     }
